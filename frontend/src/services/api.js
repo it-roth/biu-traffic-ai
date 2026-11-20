@@ -21,7 +21,8 @@ api.interceptors.response.use(
       if (refreshToken && !originalRequest.url?.includes('auth/login') && !originalRequest.url?.includes('auth/token/refresh')) {
         originalRequest._retry = true
         try {
-          const res = await axios.post('/api/auth/token/refresh/', { refresh: refreshToken })
+          const authBase = import.meta.env.VITE_API_URL || 'https://biu-traffic-api.onrender.com/api/'
+          const res = await axios.post(`${authBase.replace(/\/+$/, '')}/auth/token/refresh/`, { refresh: refreshToken })
           if (res.data?.access) {
             localStorage.setItem('access_token', res.data.access)
             originalRequest.headers.Authorization = `Bearer ${res.data.access}`

@@ -22,5 +22,6 @@ dist/
 tunnel.log
 *.log
 *.exe
+*.cache
 start_public_app.bat
 tools/yolo_settings/

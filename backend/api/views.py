@@ -7,6 +7,7 @@ from django.db.models import Sum
 from django.http import JsonResponse, StreamingHttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions, status
+from rest_framework.decorators import api_view, permission_classes as perm_classes
 from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import FormParser, MultiPartParser
@@ -40,7 +41,6 @@ class ScanImageView(APIView):
     crops any no-helmet violations as evidence, persists ViolationRecord, and returns JSON.
     """
     parser_classes = (MultiPartParser, FormParser)
-    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
@@ -142,7 +142,6 @@ class ScanVideoView(APIView):
     persists ViolationRecord, and returns JSON.
     """
     parser_classes = (MultiPartParser, FormParser)
-    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request, *args, **kwargs):
@@ -270,6 +269,8 @@ class TrafficViolationListView(ListAPIView):
         return TrafficViolation.objects.none()
 
 
+@api_view(['GET'])
+@perm_classes([permissions.AllowAny])
 def traffic_stats(request):
     user = request.user
     if user.is_authenticated:
