@@ -18,14 +18,12 @@ services:
       - key: DATABASE_URL
         sync: false
 
-  # 2. Vue 3 Single Page Application Frontend
+  # 2. Vue 3 Single Page Application Frontend (Global CDN)
   - type: web
     name: biu-traffic-web
     runtime: static
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
-    plan: free
-    region: singapore
     headers:
       - path: /*
         name: Access-Control-Allow-Origin
