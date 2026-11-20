@@ -1,16 +1,24 @@
+from django.conf import settings
 from django.db import models
 
 
 class ViolationRecord(models.Model):
     """
     Stores detected traffic violations from image and video inference scans.
-    Tracks vehicle counts, confidence scores, and media output paths.
+    Tracks user ownership, vehicle counts, confidence scores, and media output paths.
     """
 
     class MediaType(models.TextChoices):
         IMAGE = 'IMAGE', 'Image'
         VIDEO = 'VIDEO', 'Video'
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='violation_records',
+    )
     file_name = models.CharField(max_length=255)
     media_type = models.CharField(
         max_length=10,

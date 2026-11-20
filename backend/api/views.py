@@ -92,7 +92,9 @@ class ScanImageView(APIView):
                 else:
                     conf = 0.885
 
+            user = request.user if request.user.is_authenticated else None
             record = ViolationRecord.objects.create(
+                user=user,
                 file_name=upload.name,
                 media_type=ViolationRecord.MediaType.IMAGE,
                 violation_type=v_type,
@@ -192,7 +194,9 @@ class ScanVideoView(APIView):
                 else:
                     conf = 0.875
 
+            user = request.user if request.user.is_authenticated else None
             record = ViolationRecord.objects.create(
+                user=user,
                 file_name=upload.name,
                 media_type=ViolationRecord.MediaType.VIDEO,
                 violation_type=v_type,
@@ -235,13 +239,19 @@ class ScanVideoView(APIView):
 class ViolationRecordListView(ListAPIView):
     """
     GET /api/violations/
-    Returns a paginated history list of detected violation records for evidence review.
+    Returns a paginated history list of detected violation records scoped to the authenticated user.
+    If a user is new or has not performed any scans yet, it returns an empty list.
     """
-    queryset = ViolationRecord.objects.all()
     serializer_class = ViolationRecordSerializer
     pagination_class = StandardResultsPagination
-    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            # Users only see records they created with their own application account
+            return ViolationRecord.objects.filter(user=user)
+        return ViolationRecord.objects.none()
 
 
 # Legacy live stream endpoints
@@ -251,21 +261,29 @@ def hello(request):
 
 class TrafficViolationListView(ListAPIView):
     serializer_class = TrafficViolationSerializer
-    authentication_classes = ()
     permission_classes = (permissions.AllowAny,)
 
     def get_queryset(self):
-        return TrafficViolation.objects.all()[:50]
+        user = self.request.user
+        if user.is_authenticated:
+            return TrafficViolation.objects.none()
+        return TrafficViolation.objects.none()
 
 
 def traffic_stats(request):
-    total_scans = ViolationRecord.objects.count()
-    cars_sum = ViolationRecord.objects.aggregate(Sum('cars_count'))['cars_count__sum'] or 0
-    bikes_sum = ViolationRecord.objects.aggregate(Sum('motorcycles_count'))['motorcycles_count__sum'] or 0
-    violations_sum = ViolationRecord.objects.aggregate(Sum('violations_count'))['violations_count__sum'] or 0
+    user = request.user
+    if user.is_authenticated:
+        user_records = ViolationRecord.objects.filter(user=user)
+    else:
+        user_records = ViolationRecord.objects.none()
 
-    no_helmet_count = ViolationRecord.objects.filter(violation_type__icontains='HELMET').count()
-    overload_count = ViolationRecord.objects.filter(violation_type__icontains='OVERLOAD').count()
+    total_scans = user_records.count()
+    cars_sum = user_records.aggregate(Sum('cars_count'))['cars_count__sum'] or 0
+    bikes_sum = user_records.aggregate(Sum('motorcycles_count'))['motorcycles_count__sum'] or 0
+    violations_sum = user_records.aggregate(Sum('violations_count'))['violations_count__sum'] or 0
+
+    no_helmet_count = user_records.filter(violation_type__icontains='HELMET').count()
+    overload_count = user_records.filter(violation_type__icontains='OVERLOAD').count()
     total_fines_khr = (no_helmet_count * 60000) + (overload_count * 100000)
     if total_fines_khr == 0 and violations_sum > 0:
         total_fines_khr = violations_sum * 75000

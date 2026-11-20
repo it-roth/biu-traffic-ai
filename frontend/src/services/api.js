@@ -5,16 +5,9 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
-  // Skip auth token for public scan/violations endpoints to avoid
-  // stale JWT causing 401 when views already use AllowAny
-  const publicPaths = ['scan/', 'violations/']
-  const isPublic = publicPaths.some((p) => config.url?.includes(p))
-
-  if (!isPublic) {
-    const token = localStorage.getItem('access_token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
+  const token = localStorage.getItem('access_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
   }
   return config
 })
