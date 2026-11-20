@@ -175,7 +175,7 @@ const register = async () => {
               <input
                 v-model="form.username"
                 type="text"
-                placeholder="johndoe"
+                placeholder="saarothdoe"
                 autocomplete="username"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
@@ -190,7 +190,7 @@ const register = async () => {
               <input
                 v-model="form.email"
                 type="email"
-                placeholder="name@beltei.edu.kh"
+                placeholder="saaroth@gmail.com"
                 autocomplete="email"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"

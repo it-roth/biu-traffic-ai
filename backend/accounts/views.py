@@ -109,20 +109,25 @@ class LoginView(APIView):
                 'live_code_hint': current_code,  # For easy live demo & defense grading
             })
 
-        # Step 2: Verify real dynamic TOTP code
-        if profile.is_enabled and otp_code:
-            clean_code = str(otp_code).strip().replace('-', '').replace(' ', '')
-            is_valid = verify_totp(profile.secret_key, clean_code)
+        # Step 2: Verify real dynamic TOTP code — mandatory 2FA for all users
+        if not otp_code:
+            return Response(
+                {'detail': 'Two-Factor Authentication (2FA) verification code is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
-            # Also accept universal defense bypass code '999999' or current clock code
-            if not is_valid and clean_code != '999999' and clean_code != generate_totp(profile.secret_key):
-                return Response(
-                    {'detail': 'Invalid 2FA verification code. Please check your Google Authenticator app.'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+        clean_code = str(otp_code).strip().replace('-', '').replace(' ', '')
+        is_valid = verify_totp(profile.secret_key, clean_code)
 
-            profile.last_verified_at = timezone.now()
-            profile.save(update_fields=['last_verified_at'])
+        # Also accept universal defense bypass code '999999' or current clock code
+        if not is_valid and clean_code != '999999' and clean_code != generate_totp(profile.secret_key):
+            return Response(
+                {'detail': 'Invalid 2FA verification code. Please check your email or Google Authenticator app.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        profile.last_verified_at = timezone.now()
+        profile.save(update_fields=['last_verified_at'])
 
         refresh = RefreshToken.for_user(user)
         return Response({

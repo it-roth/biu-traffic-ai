@@ -228,7 +228,7 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 * **Faculty:** Information Technology & Science
 * **Department:** Computer Science & Software Engineering
 * **Academic Year:** 2025 – 2026
-* **Campus:** Campus 10, Phnom Penh, Kingdom of Cambodia
+* **Campus:** Phnom Penh, Kingdom of Cambodia
 
 | No. | Student Name | Student ID | Role & Core Responsibilities |
 | :---: | :--- | :---: | :--- |

@@ -8,7 +8,6 @@ const router = useRouter()
 
 // Authentication step: 'credentials' | '2fa'
 const currentStep = ref('credentials')
-const useTwoFactor = ref(true)
 
 // Dynamic 2FA data from backend API
 const twoFactorData = ref({
@@ -93,35 +92,24 @@ const handleCredentialSubmit = async () => {
   loading.value = true
 
   try {
-    if (useTwoFactor.value) {
-      // Step 1: Pre-validate credentials dynamically against backend API
-      const response = await api.post('auth/login/', {
-        username: form.value.username,
-        password: form.value.password,
-        validate_only: true
-      })
-      
-      // Store dynamic 2FA response from server
-      twoFactorData.value = {
-        secret_key: response.data.secret_key || '',
-        qr_code_url: response.data.qr_code_url || '',
-        live_code_hint: response.data.live_code_hint || '',
-        email_sent_to: response.data.email_sent_to || ''
-      }
-
-      currentStep.value = '2fa'
-      await nextTick()
-      if (otpRefs.value[0]) otpRefs.value[0].focus()
-    } else {
-      // Direct login without 2FA
-      const response = await api.post('auth/login/', form.value)
-      localStorage.setItem('access_token', response.data.access)
-      localStorage.setItem('refresh_token', response.data.refresh)
-      if (response.data.user) {
-        localStorage.setItem('biu_user', JSON.stringify(response.data.user))
-      }
-      router.push('/dashboard')
+    // All users are protected by mandatory Two-Factor Authentication (2FA)
+    const response = await api.post('auth/login/', {
+      username: form.value.username,
+      password: form.value.password,
+      validate_only: true
+    })
+    
+    // Store dynamic 2FA response from server
+    twoFactorData.value = {
+      secret_key: response.data.secret_key || '',
+      qr_code_url: response.data.qr_code_url || '',
+      live_code_hint: response.data.live_code_hint || '',
+      email_sent_to: response.data.email_sent_to || ''
     }
+
+    currentStep.value = '2fa'
+    await nextTick()
+    if (otpRefs.value[0]) otpRefs.value[0].focus()
   } catch (err) {
     if (err.response?.data?.detail) {
       error.value = err.response.data.detail
@@ -232,7 +220,7 @@ const backToCredentials = () => {
             <span class="text-primary">BIU</span> Traffic AI
           </h1>
           <p class="text-xs text-muted-foreground mt-1">
-            BELTEI International University • Campus 10
+            BELTEI International University 
           </p>
         </div>
       </div>
@@ -336,25 +324,11 @@ const backToCredentials = () => {
                 />
               </div>
 
-              <!-- 2FA Checkbox Option -->
-              <div class="flex items-center space-x-2.5 pt-1">
-                <input
-                  id="two-factor"
-                  v-model="useTwoFactor"
-                  type="checkbox"
-                  class="h-4 w-4 rounded border-input bg-background text-primary focus:ring-1 focus:ring-primary focus:ring-offset-background cursor-pointer"
-                />
-                <label for="two-factor" class="text-xs font-medium text-foreground cursor-pointer select-none flex items-center gap-1.5">
-                  <span>Enable Two-Factor Authentication (2FA)</span>
-                  <span class="rounded bg-primary/10 text-primary border border-primary/20 text-[10px] px-1.5 py-0.2 font-mono">Gmail / TOTP</span>
-                </label>
-              </div>
-
-              <!-- Submit Button -->
+              <!-- Submit Button with Mandatory 2FA -->
               <button
                 type="submit"
                 :disabled="loading"
-                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 w-full font-semibold gap-2 mt-2"
+                class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 w-full font-semibold gap-2 mt-4"
               >
                 <svg
                   v-if="loading"
@@ -365,7 +339,7 @@ const backToCredentials = () => {
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>{{ loading ? 'Verifying...' : (useTwoFactor ? 'Continue with 2FA →' : 'Sign in') }}</span>
+                <span>{{ loading ? 'Signing In...' : 'Sign In' }}</span>
               </button>
             </form>
 
