@@ -195,17 +195,18 @@ if USE_REDIS:
 else:
     SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 
-# Email SMTP Configuration (Gmail Production)
+# Email SMTP Configuration (Production Best Practices)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.getenv('MAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.getenv('MAIL_PORT', 587))
+EMAIL_HOST = os.environ.get('EMAIL_HOST') or os.environ.get('MAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT') or os.environ.get('MAIL_PORT', 587))
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = os.getenv('MAIL_USERNAME', 'lengsaroth9@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('MAIL_PASSWORD', 'vghe akrd meuo bqbn')
-DEFAULT_FROM_EMAIL = os.getenv('MAIL_FROM', 'lengsaroth9@gmail.com')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER') or os.environ.get('MAIL_USERNAME', 'lengsaroth9@gmail.com')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD') or os.environ.get('MAIL_PASSWORD', 'vghe akrd meuo bqbn')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL') or os.environ.get('MAIL_FROM', 'lengsaroth9@gmail.com')
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+EMAIL_TIMEOUT = 10  # Prevent slow SMTP hangs
 
-# Google OAuth2 Credentials
+# Google OAuth2 Credentials (loaded from environment)
 GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
 GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET', '')
 

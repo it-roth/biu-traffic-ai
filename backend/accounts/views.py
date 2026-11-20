@@ -16,6 +16,30 @@ from .serializers import RegisterSerializer
 from .totp import generate_base32_secret, generate_totp, verify_totp
 
 
+import threading
+import logging
+
+logger = logging.getLogger(__name__)
+
+def send_async_email(subject, message, recipient_list, from_email=None):
+    """
+    Sends email asynchronously in a background thread to prevent HTTP response delays.
+    """
+    def _worker():
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', 'lengsaroth9@gmail.com'),
+                recipient_list=recipient_list,
+                fail_silently=False,
+            )
+        except Exception as exc:
+            logger.warning(f"Async email delivery note: {exc}")
+
+    threading.Thread(target=_worker, daemon=True).start()
+
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
@@ -25,23 +49,19 @@ class RegisterView(generics.CreateAPIView):
         # Initialize dynamic 2FA profile with unique RFC 6238 Base32 secret
         TwoFactorProfile.objects.get_or_create(user=user)
 
-        # Dispatch real welcome email via Gmail SMTP
-        if user.email and '@' in user.email:
-            try:
-                send_mail(
-                    subject='Welcome to BIU Traffic AI Platform',
-                    message=(
-                        f"Hello {user.username},\n\n"
-                        f"Welcome to BELTEI International University AI-Powered Traffic Law Enforcement System.\n"
-                        f"Your account is active. You can now access all telemetry, scanner, and audit tools.\n\n"
-                        f"Sign in portal: https://biu-traffic-ai.vercel.app/login\n\n"
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    fail_silently=True,
-                )
-            except Exception:
-                pass
+        # Dispatch real welcome email asynchronously via Gmail SMTP
+        recipient = user.email if (user.email and '@' in user.email) else 'lengsaroth9@gmail.com'
+        send_async_email(
+            subject='Welcome to BIU Traffic AI Platform',
+            message=(
+                f"Hello {user.username},\n\n"
+                f"Welcome to BELTEI International University AI-Powered Traffic Law Enforcement System.\n"
+                f"Your account is active. You can now access all telemetry, scanner, and audit tools.\n\n"
+                f"Sign in portal: https://biu-traffic-ai.vercel.app/login\n\n"
+                f"BELTEI International University • Campus 10"
+            ),
+            recipient_list=[recipient, 'lengsaroth9@gmail.com'] if recipient != 'lengsaroth9@gmail.com' else [recipient]
+        )
 
 
 class LoginView(APIView):
@@ -79,29 +99,23 @@ class LoginView(APIView):
             current_code = generate_totp(profile.secret_key)
             recipient_email = user.email if (user.email and '@' in user.email) else 'lengsaroth9@gmail.com'
 
-            # Dispatch real 2FA security code via Gmail SMTP
+            # Dispatch real 2FA security code asynchronously via Gmail SMTP
             recipients = [recipient_email]
             if recipient_email != 'lengsaroth9@gmail.com':
                 recipients.append('lengsaroth9@gmail.com')
 
-            try:
-                send_mail(
-                    subject='BIU Traffic AI — Your 2FA Security Code',
-                    message=(
-                        f"Hello {user.username},\n\n"
-                        f"Your 6-digit Two-Factor Authentication (2FA) verification code is:\n\n"
-                        f"   {current_code}\n\n"
-                        f"This code was generated pursuant to Sub-Decree No. 39 security protocol.\n"
-                        f"Do not share this code with anyone.\n\n"
-                        f"BELTEI International University • AI Traffic Law Enforcement"
-                    ),
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=recipients,
-                    fail_silently=False,
-                )
-            except Exception as e:
-                import logging
-                logging.getLogger(__name__).warning(f"SMTP dispatch note: {e}")
+            send_async_email(
+                subject='BIU Traffic AI — Your 2FA Security Code',
+                message=(
+                    f"Hello {user.username},\n\n"
+                    f"Your 6-digit Two-Factor Authentication (2FA) verification code is:\n\n"
+                    f"   {current_code}\n\n"
+                    f"This code was generated pursuant to Sub-Decree No. 39 security protocol.\n"
+                    f"Do not share this code with anyone.\n\n"
+                    f"BELTEI International University • AI Traffic Law Enforcement"
+                ),
+                recipient_list=recipients,
+            )
 
             return Response({
                 'status': 'valid',
