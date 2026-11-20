@@ -352,7 +352,7 @@ const register = async () => {
 
       <!-- Footer Info -->
       <p class="text-center text-[11px] text-zinc-400 font-mono mt-6">
-        © 2026 BELTEI International University • Campus 10
+        © 2026 BELTEI International University
       </p>
 
     </div>

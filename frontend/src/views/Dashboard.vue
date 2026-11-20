@@ -65,7 +65,7 @@ const checkpoints = ref([
   {
     id: 'CP-04',
     name: 'BELTEI Perimeter Gate',
-    nameKm: 'បរិវេណសាកលវិទ្យាល័យប៊ែលធី ទីតាំងទី ១០',
+    nameKm: 'បរិវេណសាកលវិទ្យាល័យប៊ែលធី',
     status: 'ONLINE',
     fps: 25,
     flow: '21 veh/min',

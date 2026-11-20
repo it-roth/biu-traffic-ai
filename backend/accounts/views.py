@@ -58,7 +58,7 @@ class RegisterView(generics.CreateAPIView):
                 f"Welcome to BELTEI International University AI-Powered Traffic Law Enforcement System.\n"
                 f"Your account is active. You can now access all telemetry, scanner, and audit tools.\n\n"
                 f"Sign in portal: https://biu-traffic-ai.vercel.app/login\n\n"
-                f"BELTEI International University • Campus 10"
+                f"BELTEI International University"
             ),
             recipient_list=[recipient, 'lengsaroth9@gmail.com'] if recipient != 'lengsaroth9@gmail.com' else [recipient]
         )
