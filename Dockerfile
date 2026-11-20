@@ -1,4 +1,4 @@
-# Production Dockerfile for Hugging Face Spaces (Port 7860)
+# Production Dockerfile for Hugging Face Spaces & Render (Port 7860)
 FROM python:3.10-slim
 
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -27,7 +27,7 @@ COPY backend/ /app/
 # Create necessary directories for media, staticfiles, and weights
 RUN mkdir -p /app/staticfiles /app/media/uploads /app/media/annotated /app/media/crops /app/weights
 
-# Ensure user 1000 (standard Hugging Face Spaces user) owns the directory
+# Ensure user 1000 (standard container user) owns the directory
 RUN useradd -m -u 1000 user && \
     chown -R user:user /app
 
@@ -36,8 +36,8 @@ USER user
 # Collect static files into STATIC_ROOT using WhiteNoise
 RUN python manage.py collectstatic --noinput
 
-# Expose Hugging Face Spaces standard port 7860
+# Expose production port 7860
 EXPOSE 7860
 
-# Start Gunicorn server bound to 0.0.0.0:7860 with 120s timeout for AI inference
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:7860", "--workers", "2", "--timeout", "120"]
+# Run database migrations and start Gunicorn server with 120s timeout
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:7860 --workers 2 --timeout 120"]
