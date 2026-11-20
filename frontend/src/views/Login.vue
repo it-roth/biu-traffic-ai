@@ -10,6 +10,14 @@ const router = useRouter()
 const currentStep = ref('credentials')
 const useTwoFactor = ref(true)
 
+// Dynamic 2FA data from backend API
+const twoFactorData = ref({
+  secret_key: '',
+  qr_code_url: '',
+  live_code_hint: ''
+})
+const showQrCode = ref(false)
+
 const form = ref({
   username: '',
   password: ''
@@ -29,12 +37,20 @@ const handleCredentialSubmit = async () => {
 
   try {
     if (useTwoFactor.value) {
-      // Step 1: Pre-validate credentials before transitioning to 2FA screen
-      await api.post('auth/login/', {
+      // Step 1: Pre-validate credentials dynamically against backend API
+      const response = await api.post('auth/login/', {
         username: form.value.username,
         password: form.value.password,
         validate_only: true
       })
+      
+      // Store dynamic 2FA response from server
+      twoFactorData.value = {
+        secret_key: response.data.secret_key || '',
+        qr_code_url: response.data.qr_code_url || '',
+        live_code_hint: response.data.live_code_hint || ''
+      }
+
       currentStep.value = '2fa'
       await nextTick()
       if (otpRefs.value[0]) otpRefs.value[0].focus()
@@ -43,6 +59,9 @@ const handleCredentialSubmit = async () => {
       const response = await api.post('auth/login/', form.value)
       localStorage.setItem('access_token', response.data.access)
       localStorage.setItem('refresh_token', response.data.refresh)
+      if (response.data.user) {
+        localStorage.setItem('biu_user', JSON.stringify(response.data.user))
+      }
       router.push('/dashboard')
     }
   } catch (err) {
@@ -94,7 +113,7 @@ const onOtpPaste = (event) => {
   }
 }
 
-// Step 2: Finalize 2FA verification
+// Step 2: Finalize dynamic 2FA verification via API
 const verifyTwoFactor = async () => {
   const code = otpDigits.join('')
   if (code.length !== 6) {
@@ -114,12 +133,15 @@ const verifyTwoFactor = async () => {
 
     localStorage.setItem('access_token', response.data.access)
     localStorage.setItem('refresh_token', response.data.refresh)
+    if (response.data.user) {
+      localStorage.setItem('biu_user', JSON.stringify(response.data.user))
+    }
     router.push('/dashboard')
   } catch (err) {
     if (err.response?.data?.detail) {
       error.value = err.response.data.detail
     } else {
-      error.value = 'Verification failed. Please check the code and try again.'
+      error.value = 'Verification failed. Please check your authenticator code and try again.'
     }
   } finally {
     loading.value = false
@@ -227,7 +249,7 @@ const backToCredentials = () => {
                 />
               </div>
 
-              <!-- 2FA Checkbox Option (Shadcn Checkbox Style) -->
+              <!-- 2FA Checkbox Option -->
               <div class="flex items-center space-x-2.5 pt-1">
                 <input
                   id="two-factor"
@@ -237,7 +259,7 @@ const backToCredentials = () => {
                 />
                 <label for="two-factor" class="text-xs font-medium text-foreground cursor-pointer select-none flex items-center gap-1.5">
                   <span>Enable Two-Factor Authentication (2FA)</span>
-                  <span class="rounded bg-primary/10 text-primary border border-primary/20 text-[10px] px-1.5 py-0.2 font-mono">2FA</span>
+                  <span class="rounded bg-primary/10 text-primary border border-primary/20 text-[10px] px-1.5 py-0.2 font-mono">TOTP</span>
                 </label>
               </div>
 
@@ -256,7 +278,7 @@ const backToCredentials = () => {
                   <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                   <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                <span>{{ loading ? 'Verifying...' : (useTwoFactor ? 'Continue to 2FA Verification →' : 'Sign in') }}</span>
+                <span>{{ loading ? 'Verifying...' : (useTwoFactor ? 'Continue with 2FA →' : 'Sign in') }}</span>
               </button>
             </form>
 
@@ -273,9 +295,9 @@ const backToCredentials = () => {
           </div>
         </template>
 
-        <!-- STEP 2: TWO-FACTOR AUTHENTICATION (2FA OTP) -->
+        <!-- STEP 2: DYNAMIC TWO-FACTOR AUTHENTICATION (TOTP) -->
         <template v-else>
-          <!-- Card Header with Security Shield Icon -->
+          <!-- Card Header -->
           <div class="p-6 pb-4 text-center space-y-2 border-b border-border/60">
             <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 border border-primary/20 text-primary">
               <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -284,12 +306,12 @@ const backToCredentials = () => {
             </div>
             <h2 class="text-lg font-semibold tracking-tight text-foreground">Two-Factor Authentication</h2>
             <p class="text-xs text-muted-foreground max-w-xs mx-auto">
-              Enter the 6-digit security code generated by your authenticator app
+              Enter the 6-digit code from Google Authenticator
             </p>
           </div>
 
-          <!-- Card Content (Shadcn InputOTP Slots) -->
-          <div class="p-6 space-y-5">
+          <!-- Card Content -->
+          <div class="p-6 space-y-4">
             
             <!-- Destructive Alert -->
             <div
@@ -302,8 +324,32 @@ const backToCredentials = () => {
               <div class="flex-1 leading-relaxed">{{ error }}</div>
             </div>
 
+            <!-- Optional QR Code Setup Toggle -->
+            <div class="text-center">
+              <button
+                type="button"
+                @click="showQrCode = !showQrCode"
+                class="text-xs text-primary hover:text-primary/80 font-medium inline-flex items-center gap-1 transition-colors"
+              >
+                <span>{{ showQrCode ? 'Hide QR Code' : 'Scan with Authenticator App (QR Code)' }}</span>
+                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              <!-- Dynamic QR Code Card -->
+              <div v-if="showQrCode && twoFactorData.qr_code_url" class="mt-3 p-3 rounded-lg border border-border bg-background/80 space-y-2">
+                <div class="bg-white p-2 rounded-md inline-block shadow">
+                  <img :src="twoFactorData.qr_code_url" alt="Authenticator QR Code" class="h-36 w-36 object-contain" />
+                </div>
+                <div class="text-[10px] text-muted-foreground font-mono">
+                  Secret Key: <span class="text-foreground select-all">{{ twoFactorData.secret_key }}</span>
+                </div>
+              </div>
+            </div>
+
             <!-- Shadcn InputOTP 6-Box Grid -->
-            <div class="flex items-center justify-center gap-2" @paste="onOtpPaste">
+            <div class="flex items-center justify-center gap-2 pt-1" @paste="onOtpPaste">
               <template v-for="(digit, idx) in otpDigits" :key="idx">
                 <input
                   :ref="el => (otpRefs[idx] = el)"
@@ -315,21 +361,16 @@ const backToCredentials = () => {
                   @input="onOtpInput(idx, $event)"
                   @keydown="onOtpKeyDown(idx, $event)"
                 />
-                <!-- Separator dot after 3rd slot -->
                 <span v-if="idx === 2" class="text-muted-foreground text-sm font-bold px-0.5">•</span>
               </template>
             </div>
-
-            <p class="text-center text-[11px] text-muted-foreground font-mono">
-              Tip: You can paste a 6-digit code directly
-            </p>
 
             <!-- Verify Button -->
             <button
               type="button"
               :disabled="loading"
               @click="verifyTwoFactor"
-              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 w-full font-semibold gap-2"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10 px-4 py-2 w-full font-semibold gap-2 mt-2"
             >
               <svg
                 v-if="loading"
@@ -349,7 +390,7 @@ const backToCredentials = () => {
               @click="backToCredentials"
               class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-colors h-9 px-4 w-full"
             >
-              ← Back to login credentials
+              ← Back to credentials
             </button>
 
           </div>
