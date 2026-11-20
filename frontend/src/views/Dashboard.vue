@@ -309,18 +309,18 @@ const t = (key) => translations[currentLang.value]?.[key] || translations.en[key
       <!-- Dashboard Main Container -->
       <main class="p-4 sm:p-6 lg:p-8 space-y-6 max-w-7xl w-full mx-auto">
         
-        <!-- Welcome Executive Banner -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-zinc-800/80 bg-zinc-900/50 p-6 backdrop-blur-md">
+        <!-- Welcome Executive Banner (Shadcn Card) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-border bg-card/60 p-6 backdrop-blur-xl shadow-sm">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-xs font-semibold uppercase tracking-wider text-[#006CB8]">Phnom Penh Metropolitan Sector</span>
-              <span class="text-xs text-zinc-500">•</span>
-              <span class="text-xs text-zinc-400">Jurisdiction: BELTEI Police Division</span>
+              <span class="text-xs font-semibold uppercase tracking-wider text-primary">Phnom Penh Metropolitan Sector</span>
+              <span class="text-xs text-muted-foreground">•</span>
+              <span class="text-xs text-muted-foreground">Jurisdiction: BELTEI Police Division</span>
             </div>
-            <h1 class="text-xl sm:text-2xl font-bold text-white mt-1">
-              {{ t('overview') }} <span v-if="user" class="text-zinc-400 font-normal">({{ user.username }})</span>
+            <h1 class="text-xl sm:text-2xl font-bold text-foreground mt-1 tracking-tight">
+              {{ t('overview') }} <span v-if="user" class="text-muted-foreground font-normal">({{ user.username }})</span>
             </h1>
-            <p class="text-xs sm:text-sm text-zinc-400 mt-1">
+            <p class="text-xs sm:text-sm text-muted-foreground mt-1">
               {{ t('subtitle') }}
             </p>
           </div>
@@ -329,7 +329,7 @@ const t = (key) => translations[currentLang.value]?.[key] || translations.en[key
             <button
               @click="fetchDashboardData"
               :disabled="loadingData"
-              class="px-3.5 py-2 rounded-xl border border-zinc-800 bg-zinc-900 hover:bg-zinc-800 text-xs font-medium text-zinc-300 hover:text-white transition flex items-center gap-2"
+              class="inline-flex items-center justify-center rounded-md border border-input bg-background/50 h-9 px-3 text-xs font-medium text-foreground shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors gap-2"
             >
               <svg
                 class="h-3.5 w-3.5"
@@ -345,7 +345,7 @@ const t = (key) => translations[currentLang.value]?.[key] || translations.en[key
 
             <router-link
               to="/scan"
-              class="px-4 py-2 rounded-xl bg-[#006CB8] hover:bg-[#005a9c] text-xs font-semibold text-white shadow-md shadow-blue-900/30 transition flex items-center gap-1.5"
+              class="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground h-9 px-4 text-xs font-semibold shadow hover:bg-primary/90 transition-colors gap-1.5"
             >
               <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -359,7 +359,7 @@ const t = (key) => translations[currentLang.value]?.[key] || translations.en[key
         <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           
           <!-- Scans Logged -->
-          <div class="rounded-xl border border-zinc-800/80 bg-zinc-900/60 p-4 backdrop-blur-md">
+          <div class="rounded-xl border border-border bg-card/60 p-4 backdrop-blur-xl shadow-sm">
             <div class="flex items-center justify-between">
               <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">{{ t('totalScans') }}</span>
               <div class="rounded-lg bg-[#006CB8]/10 p-2 text-[#006CB8] border border-[#006CB8]/20">

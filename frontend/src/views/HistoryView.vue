@@ -222,40 +222,40 @@ const t = (key) => translations[currentLang.value]?.[key] || translations.en[key
           </div>
         </div>
 
-        <!-- Filter & Search Toolbar Card -->
-        <div class="rounded-xl border border-zinc-800 bg-zinc-900/70 p-4 space-y-3">
+        <!-- Filter & Search Toolbar Card (Shadcn Card) -->
+        <div class="rounded-xl border border-border bg-card/60 p-4 space-y-3 backdrop-blur-xl shadow-sm">
           <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
             
             <!-- Filters Group -->
             <div class="flex flex-wrap items-center gap-2.5 text-xs">
               
-              <!-- Media Type Dropdown -->
+              <!-- Media Type Dropdown (Shadcn Select) -->
               <select
                 v-model="selectedMediaType"
-                class="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-zinc-300 focus:outline-none focus:border-[#006CB8]"
+                class="flex h-9 rounded-md border border-input bg-background/60 px-3 py-1 text-xs text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="ALL">{{ t('allMedia') }}</option>
                 <option value="IMAGE">{{ t('imagesOnly') }}</option>
                 <option value="VIDEO">{{ t('videosOnly') }}</option>
               </select>
 
-              <!-- Status Dropdown -->
+              <!-- Status Dropdown (Shadcn Select) -->
               <select
                 v-model="selectedStatus"
-                class="rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-zinc-300 focus:outline-none focus:border-[#006CB8]"
+                class="flex h-9 rounded-md border border-input bg-background/60 px-3 py-1 text-xs text-foreground shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 <option value="ALL">{{ t('allStatus') }}</option>
                 <option value="VIOLATION">{{ t('flaggedOnly') }}</option>
                 <option value="COMPLIANT">{{ t('compliantOnly') }}</option>
               </select>
 
-              <!-- Search Input (Mobile & Desktop) -->
+              <!-- Search Input (Shadcn Input) -->
               <div class="relative flex-1 sm:w-64">
                 <input
                   v-model="searchQuery"
                   type="text"
                   :placeholder="t('searchPlaceholder')"
-                  class="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#006CB8]"
+                  class="flex h-9 w-full rounded-md border border-input bg-background/60 px-3 py-1 text-xs text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 />
               </div>
 
