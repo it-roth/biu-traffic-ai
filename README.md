@@ -33,8 +33,6 @@ Designed for production deployment on **Hugging Face Spaces** (Docker containeri
 
 ## 🏛️ System Architecture & Engineering Blueprint
 
-![BIU Traffic AI System Architecture](architecture_diagram.png)
-
 ### 1. End-to-End Architectural Dataflow
 
 ```mermaid

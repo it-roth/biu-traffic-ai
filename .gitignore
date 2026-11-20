@@ -16,3 +16,10 @@ dist/
 .env.*
 .vscode/
 .idea/
+
+# Local Deployment & Temporary Binaries
+tunnel.log
+*.log
+*.exe
+start_public_app.bat
+tools/yolo_settings/
