@@ -354,7 +354,7 @@ const loadSampleMedia = async (samplePath, filename) => {
     if (!response.ok) throw new Error('Failed to load sample media')
     const blob = await response.blob()
     const file = new File([blob], filename, { type: blob.type || 'image/jpeg' })
-    handleFileSelection(file)
+    processFile(file)
   } catch (err) {
     console.error('Error loading sample media:', err)
   }

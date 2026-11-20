@@ -39,5 +39,5 @@ RUN python manage.py collectstatic --noinput
 # Expose production port 7860
 EXPOSE 7860
 
-# Run database migrations and start Gunicorn server with 120s timeout
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:7860 --workers 2 --timeout 120"]
+# Run database migrations and start Gunicorn server with single-worker multi-threading and 300s timeout for ML safety
+CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:7860 --workers 1 --threads 4 --timeout 300"]

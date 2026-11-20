@@ -71,30 +71,19 @@ class AIEngine:
 
         base_dir = Path(__file__).resolve().parent.parent
 
-        # 1. Resolve Helmet Model
-        helmet_weights = self._resolve_model_path(
-            helmet_model_path,
+        # Resolve Unified Cambodia Traffic & Helmet Model (best.pt: 10 classes)
+        weights = self._resolve_model_path(
+            helmet_model_path or traffic_model_path,
             preferred=[
                 str(base_dir / "weights" / "best.pt"),
                 str(base_dir.parent / "backend" / "weights" / "best.pt"),
             ],
-            fallback="yolov8n.pt",
+            fallback=str(base_dir / "weights" / "best.pt"),
         )
-        logger.info(f"Loading Helmet Model: {helmet_weights}")
-        self.helmet_model = YOLO(helmet_weights)
-
-        # 2. Resolve Vehicle & Traffic Scene Model
-        traffic_weights = self._resolve_model_path(
-            traffic_model_path,
-            preferred=[
-                str(base_dir.parent / "yolo26s.pt"),
-                str(base_dir / "yolov8n.pt"),
-                str(base_dir.parent / "policeai-backend" / "policeai_django" / "yolo11s.pt"),
-            ],
-            fallback="yolov8n.pt",
-        )
-        logger.info(f"Loading Traffic Scene Model: {traffic_weights}")
-        self.traffic_model = YOLO(traffic_weights)
+        logger.info(f"Loading Unified Cambodia Traffic Model: {weights}")
+        self.model = YOLO(weights)
+        self.helmet_model = self.model
+        self.traffic_model = self.model
 
         self.rule_engine = CambodianTrafficRuleEngine()
 
@@ -298,11 +287,10 @@ class AIEngine:
         clean_img = img.copy()
         h, w = img.shape[:2]
 
-        # 1. Run General Traffic Model (Vehicles & Persons)
-        traffic_results = self.traffic_model.predict(img, conf=0.25, verbose=False)[0]
-
-        # 2. Run Helmet Specialist Model
-        helmet_results = self.helmet_model.predict(img, conf=0.25, verbose=False)[0]
+        # Unified single-pass inference across all 10 Cambodian traffic & helmet classes
+        results = self.model.predict(img, conf=0.25, verbose=False)[0]
+        traffic_results = results
+        helmet_results = results
 
         cars_count = 0
         motorcycles_count = 0
@@ -599,9 +587,9 @@ class AIEngine:
                 frame_index += 1
                 clean_frame = frame.copy()
 
-                # 1. Track Vehicles with ByteTrack (with fallback to fast inference)
+                # 1. Track Vehicles & Helmets with ByteTrack in a unified pass
                 try:
-                    traffic_res = self.traffic_model.track(
+                    res = self.model.track(
                         frame,
                         persist=True,
                         tracker="bytetrack.yaml",
@@ -609,14 +597,14 @@ class AIEngine:
                         verbose=False,
                     )[0]
                 except Exception:
-                    traffic_res = self.traffic_model.predict(
+                    res = self.model.predict(
                         frame,
                         conf=0.25,
                         verbose=False,
                     )[0]
 
-                # 2. Inspect Helmets
-                helmet_res = self.helmet_model.predict(frame, conf=0.25, verbose=False)[0]
+                traffic_res = res
+                helmet_res = res
 
                 # Parse Vehicles
                 motorcycle_boxes: List[DetectionBox] = []
