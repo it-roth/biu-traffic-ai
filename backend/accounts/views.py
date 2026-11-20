@@ -221,14 +221,15 @@ class GoogleLoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        google_aud = data.get('aud')
-        expected_client_id = getattr(
-            settings,
-            'GOOGLE_CLIENT_ID',
-            '1030898514261-k50cgev5g3tk45ai4k0jhkb9cm65a1h6.apps.googleusercontent.com'
-        )
+        google_aud = str(data.get('aud') or '').strip()
+        configured_client_id = str(getattr(settings, 'GOOGLE_CLIENT_ID', '') or '').strip()
+        default_client_id = '1030898514261-k50cgev5g3tk45ai4k0jhkb9cm65a1h6.apps.googleusercontent.com'
 
-        if google_aud != expected_client_id:
+        valid_client_ids = {default_client_id}
+        if configured_client_id:
+            valid_client_ids.add(configured_client_id)
+
+        if google_aud not in valid_client_ids:
             return Response(
                 {'detail': 'Google OAuth Client ID mismatch.'},
                 status=status.HTTP_400_BAD_REQUEST
