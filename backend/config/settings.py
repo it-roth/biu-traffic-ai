@@ -1,14 +1,32 @@
 """
 Django settings for config project.
+Production-ready configuration for Hugging Face Spaces + Neon PostgreSQL.
 """
 
 from pathlib import Path
 import os
 
+try:
+    import dj_database_url
+except ImportError:
+    dj_database_url = None
+
+try:
+    import whitenoise  # noqa: F401
+    HAS_WHITENOISE = True
+except ImportError:
+    HAS_WHITENOISE = False
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-s19e47bcw2kcs&jwh1xq@a8f5-y89k%2#@mcx!!tqh17l$75#6'
-DEBUG = True
+# Security & Environment
+SECRET_KEY = os.getenv(
+    'SECRET_KEY',
+    'django-insecure-s19e47bcw2kcs&jwh1xq@a8f5-y89k%2#@mcx!!tqh17l$75#6'
+)
+DEBUG = os.getenv('DEBUG', 'False').lower() in ('true', '1')
+
+# Allowed Hosts (Accepts all in container environments like HF Spaces)
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -18,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    *(['whitenoise.runserver_nostatic'] if HAS_WHITENOISE else []),
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
@@ -28,6 +47,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    *(['whitenoise.middleware.WhiteNoiseMiddleware'] if HAS_WHITENOISE else []),
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -38,19 +58,25 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'config.urls'
 
-# CORS Configuration
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
+# CORS Configuration (Production Frontend + Local Dev)
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'True').lower() in ('true', '1')
+
+env_cors = [origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS', '').split(',') if origin.strip()]
+CORS_ALLOWED_ORIGINS = env_cors or [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
 ]
 CORS_ALLOW_CREDENTIALS = True
 
-# CSRF — trust the Vite dev server and any localhost origin
-CSRF_TRUSTED_ORIGINS = [
+# CSRF Configuration (Trust Hugging Face Spaces + Frontend)
+env_csrf = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if origin.strip()]
+CSRF_TRUSTED_ORIGINS = env_csrf or [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://localhost:8000",
+    "http://localhost:7860",
+    "https://*.hf.space",
 ]
 
 REST_FRAMEWORK = {
@@ -89,8 +115,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
-if os.getenv('DB_ENGINE', 'sqlite').lower() == 'postgresql':
+# Database Configuration (Neon PostgreSQL via DATABASE_URL or Fallback)
+DATABASE_URL = os.getenv('DATABASE_URL')
+if DATABASE_URL and dj_database_url:
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+            ssl_require=True,
+        )
+    }
+elif os.getenv('DB_ENGINE', 'sqlite').lower() == 'postgresql':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -121,8 +157,12 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files & Media storage
-STATIC_URL = 'static/'
+# Static files & WhiteNoise Configuration
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Media storage
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
@@ -147,7 +187,6 @@ if USE_REDIS:
         SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
         SESSION_CACHE_ALIAS = 'default'
     except ImportError:
-        # Fallback to database-backed sessions if django-redis package is not yet installed
         SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 else:
     SESSION_ENGINE = 'django.contrib.sessions.backends.db'
