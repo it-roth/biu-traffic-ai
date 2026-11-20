@@ -4,6 +4,7 @@ __pycache__/
 .venv/
 venv/
 *.pt
+!backend/weights/best.pt
 runs/
 
 # Node / Vue
