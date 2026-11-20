@@ -1,0 +1,14 @@
+names:
+  0: car
+  1: motorcycle
+  2: auto_rickshaw
+  3: remorque
+  4: truck
+  5: bus
+  6: rider_helmet
+  7: rider_no_helmet
+  8: traffic_light_red
+  9: traffic_light_green
+path: D:\biu-traffic-ai\tools\cambodia_traffic_data
+train: images/train
+val: images/val

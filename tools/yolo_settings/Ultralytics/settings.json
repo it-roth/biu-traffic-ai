@@ -1,0 +1,19 @@
+{
+  "settings_version": "0.0.8",
+  "datasets_dir": "D:\\biu-traffic-ai\\datasets",
+  "weights_dir": "weights",
+  "runs_dir": "runs",
+  "uuid": "5e9ed048bfa692193d096f2df658aa4322f5266edee51630ba5c1b577fd33f7b",
+  "sync": true,
+  "api_key": "",
+  "openai_api_key": "",
+  "clearml": true,
+  "comet": true,
+  "dvc": true,
+  "mlflow": true,
+  "raytune": true,
+  "tensorboard": false,
+  "wandb": false,
+  "vscode_msg": true,
+  "openvino_msg": true
+}

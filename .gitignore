@@ -1,0 +1,18 @@
+# Python / Django / YOLO
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.pt
+runs/
+
+# Node / Vue
+node_modules/
+dist/
+.nuxt/
+
+# Environment & IDE
+.env
+.env.*
+.vscode/
+.idea/

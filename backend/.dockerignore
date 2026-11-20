@@ -1,0 +1,9 @@
+django/
+django*/
+media/
+db.sqlite3
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/

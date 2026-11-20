@@ -1,0 +1,73 @@
+name: biu-traffic-ai
+
+volumes:
+  biu-pg-vol:
+    driver: local
+  biu-redis-vol:
+    driver: local
+  biu-redisinsight-vol:
+    driver: local
+
+networks:
+  biu-net:
+    driver: bridge
+
+services:
+  biu-postgres:
+    container_name: biu-postgres
+    image: postgres:18.4
+    ports:
+      - "9927:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-biuuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-roth123}
+      POSTGRES_USER: ${POSTGRES_USER:-biuuser}
+    volumes:
+      - biu-pg-vol:/var/lib/postgresql/18/docker
+    networks:
+      - biu-net
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U biuuser -d biuuser" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  biu-adminer:
+    container_name: biu-adminer
+    image: adminer:latest
+    ports:
+      - "8085:8080"
+    depends_on:
+      - biu-postgres
+    networks:
+      - biu-net
+    restart: unless-stopped
+
+  biu-redis:
+    container_name: biu-redis
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - biu-redis-vol:/data
+    networks:
+      - biu-net
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  biu-redisinsight:
+    container_name: biu-redisinsight
+    image: redis/redisinsight:latest
+    ports:
+      - "5541:5540"
+    depends_on:
+      - biu-redis
+    volumes:
+      - biu-redisinsight-vol:/data
+    networks:
+      - biu-net
+    restart: unless-stopped
