@@ -25,7 +25,7 @@ const register = async () => {
     const data = err.response?.data
     error.value = data
       ? Object.values(data).flat().join(' ')
-      : 'Registration failed. Please try a different username or verify email.'
+      : 'Registration failed. Please check your information and try again.'
   } finally {
     loading.value = false
   }
@@ -39,7 +39,7 @@ const register = async () => {
     <div class="absolute top-[-15%] right-[25%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-15%] left-[25%] w-[500px] h-[500px] bg-sky-900/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <div class="w-full max-w-[440px] relative z-10 space-y-6">
+    <div class="w-full max-w-[400px] relative z-10 space-y-6">
       
       <!-- System Branding Header -->
       <div class="text-center space-y-3">
@@ -48,10 +48,10 @@ const register = async () => {
         </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
-            <span class="text-primary">BIU</span> Traffic Enforcement
+            <span class="text-primary">BIU</span> Traffic AI
           </h1>
           <p class="text-xs text-muted-foreground mt-1">
-            BELTEI International University • Official Enforcement Registration
+            BELTEI International University
           </p>
         </div>
       </div>
@@ -61,21 +61,16 @@ const register = async () => {
         
         <!-- Card Header -->
         <div class="p-6 pb-4 space-y-1.5 border-b border-border/60">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold tracking-tight text-foreground">Create Officer Profile</h2>
-            <span class="inline-flex items-center rounded-md border border-border bg-muted px-2 py-0.5 text-[10px] font-mono font-medium text-muted-foreground">
-              Officer Role
-            </span>
-          </div>
+          <h2 class="text-lg font-semibold tracking-tight text-foreground">Create an account</h2>
           <p class="text-xs text-muted-foreground">
-            Register your institutional badge for traffic safety auditing
+            Enter your information below to create your account
           </p>
         </div>
 
         <!-- Card Content -->
-        <div class="p-6 space-y-5">
+        <div class="p-6 space-y-4">
           
-          <!-- Shadcn Destructive Alert -->
+          <!-- Destructive Alert -->
           <div
             v-if="error"
             class="relative w-full rounded-lg border border-destructive/50 bg-destructive/10 p-3.5 text-xs text-rose-300 flex items-start gap-3 transition-all animate-in fade-in"
@@ -89,43 +84,41 @@ const register = async () => {
           <!-- Registration Form -->
           <form @submit.prevent="register" class="space-y-4">
             
-            <!-- Officer Username -->
+            <!-- Username -->
             <div class="space-y-2">
-              <label class="text-xs font-medium leading-none text-foreground flex items-center justify-between">
-                <span>Officer Username</span>
-                <span class="text-[10px] text-muted-foreground font-mono">Unique ID</span>
+              <label class="text-xs font-medium leading-none text-foreground">
+                Username
               </label>
               <input
                 v-model="form.username"
                 type="text"
-                placeholder="e.g. saroth_officer"
+                placeholder="johndoe"
                 autocomplete="username"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
-            <!-- Email Address -->
+            <!-- Email -->
             <div class="space-y-2">
-              <label class="text-xs font-medium leading-none text-foreground flex items-center justify-between">
-                <span>Institutional Email</span>
-                <span class="text-[10px] text-muted-foreground font-mono">Official</span>
+              <label class="text-xs font-medium leading-none text-foreground">
+                Email
               </label>
               <input
                 v-model="form.email"
                 type="email"
-                placeholder="officer@beltei.edu.kh"
+                placeholder="name@beltei.edu.kh"
                 autocomplete="email"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
             </div>
 
-            <!-- Secure Password -->
+            <!-- Password -->
             <div class="space-y-2">
               <div class="flex items-center justify-between">
                 <label class="text-xs font-medium leading-none text-foreground">
-                  Security Password
+                  Password
                 </label>
                 <button
                   type="button"
@@ -139,18 +132,18 @@ const register = async () => {
               <input
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
-                placeholder="Minimum 8 characters"
+                placeholder="••••••••"
                 minlength="8"
                 autocomplete="new-password"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
               />
               <p class="text-[11px] text-muted-foreground">
-                Must contain at least 8 alphanumeric characters.
+                Must be at least 8 characters.
               </p>
             </div>
 
-            <!-- Shadcn Primary Button -->
+            <!-- Submit Button -->
             <button
               type="submit"
               :disabled="loading"
@@ -165,7 +158,7 @@ const register = async () => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>{{ loading ? 'Creating Profile...' : 'Complete Registration' }}</span>
+              <span>{{ loading ? 'Creating account...' : 'Create account' }}</span>
             </button>
           </form>
 
@@ -174,9 +167,9 @@ const register = async () => {
         <!-- Card Footer -->
         <div class="p-6 pt-0 border-t border-border/60 text-center">
           <p class="text-xs text-muted-foreground mt-4">
-            Already authorized as an officer?
+            Already have an account?
             <router-link to="/login" class="text-primary hover:text-primary/80 font-semibold underline-offset-4 hover:underline ml-1">
-              Sign In
+              Sign in
             </router-link>
           </p>
         </div>
@@ -185,7 +178,7 @@ const register = async () => {
 
       <!-- Footer Info -->
       <p class="text-center text-[11px] text-muted-foreground font-mono">
-        © 2026 BELTEI International University • Campus 10
+        © 2026 BELTEI International University
       </p>
 
     </div>

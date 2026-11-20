@@ -14,7 +14,6 @@ class ProtectedView(APIView):
         return Response({
             'id': request.user.id, 
             'username': request.user.username, 
-            'email': request.user.email or f"{request.user.username}@istad.edu.kh",
+            'email': request.user.email or f"{request.user.username}@beltei.edu.kh",
             'is_superuser': request.user.is_superuser,
-            'role': 'System Administrator' if request.user.is_superuser else 'Traffic Patrol Officer',
         })

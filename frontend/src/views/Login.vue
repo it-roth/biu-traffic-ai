@@ -15,12 +15,6 @@ const error = ref('')
 const loading = ref(false)
 const showPassword = ref(false)
 
-const fillCredentials = (user, pass) => {
-  form.value.username = user
-  form.value.password = pass
-  error.value = ''
-}
-
 const login = async () => {
   error.value = ''
   loading.value = true
@@ -36,7 +30,7 @@ const login = async () => {
     if (err.response?.data?.detail) {
       error.value = err.response.data.detail
     } else {
-      error.value = 'Invalid username or password. Please verify your officer credentials.'
+      error.value = 'Invalid username or password. Please check your credentials.'
     }
   } finally {
     loading.value = false
@@ -51,7 +45,7 @@ const login = async () => {
     <div class="absolute top-[-15%] left-[25%] w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none"></div>
     <div class="absolute bottom-[-15%] right-[25%] w-[500px] h-[500px] bg-sky-900/10 rounded-full blur-[140px] pointer-events-none"></div>
 
-    <div class="w-full max-w-[420px] relative z-10 space-y-6">
+    <div class="w-full max-w-[400px] relative z-10 space-y-6">
       
       <!-- System Branding Header -->
       <div class="text-center space-y-3">
@@ -60,10 +54,10 @@ const login = async () => {
         </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
-            <span class="text-primary">BIU</span> Traffic Enforcement
+            <span class="text-primary">BIU</span> Traffic AI
           </h1>
           <p class="text-xs text-muted-foreground mt-1">
-            BELTEI International University • Official AI Law Portal
+            BELTEI International University
           </p>
         </div>
       </div>
@@ -73,21 +67,16 @@ const login = async () => {
         
         <!-- Card Header -->
         <div class="p-6 pb-4 space-y-1.5 border-b border-border/60">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-semibold tracking-tight text-foreground">Sign in to console</h2>
-            <span class="inline-flex items-center rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-mono font-medium text-primary">
-              Sub-Decree 39
-            </span>
-          </div>
+          <h2 class="text-lg font-semibold tracking-tight text-foreground">Sign in to your account</h2>
           <p class="text-xs text-muted-foreground">
-            Enter your credentials to access live radar and telemetry
+            Enter your credentials below to access the platform
           </p>
         </div>
 
         <!-- Card Content -->
-        <div class="p-6 space-y-5">
+        <div class="p-6 space-y-4">
           
-          <!-- Shadcn Destructive Alert -->
+          <!-- Destructive Alert -->
           <div
             v-if="error"
             class="relative w-full rounded-lg border border-destructive/50 bg-destructive/10 p-3.5 text-xs text-rose-300 flex items-start gap-3 transition-all animate-in fade-in"
@@ -103,20 +92,17 @@ const login = async () => {
             
             <!-- Username Input -->
             <div class="space-y-2">
-              <label class="text-xs font-medium leading-none text-foreground flex items-center justify-between">
-                <span>Username or Admin ID</span>
-                <span class="text-[10px] text-muted-foreground font-mono">Required</span>
+              <label class="text-xs font-medium leading-none text-foreground">
+                Username
               </label>
-              <div class="relative">
-                <input
-                  v-model="form.username"
-                  type="text"
-                  placeholder="e.g. admin or officer_id"
-                  autocomplete="username"
-                  required
-                  class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
+              <input
+                v-model="form.username"
+                type="text"
+                placeholder="Username"
+                autocomplete="username"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
             </div>
 
             <!-- Password Input -->
@@ -134,19 +120,17 @@ const login = async () => {
                   {{ showPassword ? 'Hide' : 'Show' }}
                 </button>
               </div>
-              <div class="relative">
-                <input
-                  v-model="form.password"
-                  :type="showPassword ? 'text' : 'password'"
-                  placeholder="••••••••"
-                  autocomplete="current-password"
-                  required
-                  class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
-                />
-              </div>
+              <input
+                v-model="form.password"
+                :type="showPassword ? 'text' : 'password'"
+                placeholder="••••••••"
+                autocomplete="current-password"
+                required
+                class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
+              />
             </div>
 
-            <!-- Shadcn Primary Button -->
+            <!-- Submit Button -->
             <button
               type="submit"
               :disabled="loading"
@@ -161,43 +145,18 @@ const login = async () => {
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>{{ loading ? 'Authenticating...' : 'Sign In to Dashboard' }}</span>
+              <span>{{ loading ? 'Signing in...' : 'Sign in' }}</span>
             </button>
           </form>
-
-          <!-- Quick Test Accounts (Shadcn Secondary Pills) -->
-          <div class="rounded-lg border border-border/70 bg-background/40 p-3 space-y-2">
-            <span class="text-[11px] font-medium text-muted-foreground block">
-              Quick 1-Click Officer Sign-In:
-            </span>
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                @click="fillCredentials('admin', 'admin123')"
-                class="inline-flex items-center justify-between rounded-md border border-input bg-background px-2.5 py-1.5 text-xs font-mono text-zinc-300 hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                <span>admin</span>
-                <span class="text-[10px] text-muted-foreground font-sans">Superuser</span>
-              </button>
-              <button
-                type="button"
-                @click="fillCredentials('roth', 'roth123')"
-                class="inline-flex items-center justify-between rounded-md border border-input bg-background px-2.5 py-1.5 text-xs font-mono text-zinc-300 hover:bg-accent hover:text-accent-foreground transition-colors"
-              >
-                <span>roth</span>
-                <span class="text-[10px] text-muted-foreground font-sans">Officer</span>
-              </button>
-            </div>
-          </div>
 
         </div>
 
         <!-- Card Footer -->
         <div class="p-6 pt-0 border-t border-border/60 text-center">
           <p class="text-xs text-muted-foreground mt-4">
-            Need a new enforcement profile?
+            Don't have an account?
             <router-link to="/register" class="text-primary hover:text-primary/80 font-semibold underline-offset-4 hover:underline ml-1">
-              Create an account
+              Sign up
             </router-link>
           </p>
         </div>
@@ -206,7 +165,7 @@ const login = async () => {
 
       <!-- Footer Info -->
       <p class="text-center text-[11px] text-muted-foreground font-mono">
-        © 2026 BELTEI International University • Campus 10
+        © 2026 BELTEI International University
       </p>
 
     </div>

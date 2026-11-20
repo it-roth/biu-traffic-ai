@@ -27,9 +27,8 @@ const currentUser = computed(() => {
     if (raw) return JSON.parse(raw)
   } catch {}
   return {
-    username: 'admin',
-    role: 'System Administrator',
-    email: 'admin@istad.edu.kh'
+    username: 'User',
+    email: 'user@beltei.edu.kh'
   }
 })
 
@@ -237,8 +236,8 @@ const menuGroups = [
               {{ userInitials }}
             </div>
             <div class="min-w-0">
-              <span class="text-xs font-semibold text-white block truncate leading-tight">{{ currentUser.role || 'System Administrator' }}</span>
-              <span class="text-[10px] text-zinc-400 font-mono block truncate">{{ currentUser.email || 'admin@istad.edu.kh' }}</span>
+              <span class="text-xs font-semibold text-white block truncate leading-tight">{{ currentUser.username || 'User' }}</span>
+              <span class="text-[10px] text-zinc-400 font-mono block truncate">{{ currentUser.email || 'user@beltei.edu.kh' }}</span>
             </div>
           </div>
 
