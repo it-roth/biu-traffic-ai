@@ -17,6 +17,20 @@ services:
         value: "True"
       - key: DATABASE_URL
         sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: MAIL_HOST
+        value: "smtp.gmail.com"
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM
+        sync: false
 
   # 2. Vue 3 Single Page Application Frontend (Global CDN)
   - type: web
@@ -27,6 +41,8 @@ services:
     envVars:
       - key: VITE_API_URL
         value: https://biu-traffic-api.onrender.com/api/
+      - key: VITE_GOOGLE_CLIENT_ID
+        value: 1030898514261-k50cgev5g3tk45ai4k0jhkb9cm65a1h6.apps.googleusercontent.com
     headers:
       - path: /*
         name: Access-Control-Allow-Origin

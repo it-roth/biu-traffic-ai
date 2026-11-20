@@ -63,7 +63,7 @@ const strings = {
     systemOnline: 'System Online',
     backendOffline: 'Backend Offline',
     liveFeed: 'Live Camera Feed',
-    backendUnreachable: 'Django API is unreachable at http://localhost:8000',
+    backendUnreachable: 'Django API is unreachable at https://biu-traffic-api.onrender.com',
     ensureBackend: 'Please ensure the backend server is running:',
     retry: 'Retry',
     connecting: 'Connecting...',
@@ -138,7 +138,7 @@ const strings = {
     systemOnline: 'ប្រព័ន្ធដំណើរការធម្មតា',
     backendOffline: 'ប្រព័ន្ធម៉ាស៊ីនមេដាច់ការតភ្ជាប់',
     liveFeed: 'ទិដ្ឋភាពកាមេរ៉ាផ្ទាល់',
-    backendUnreachable: 'មិនអាចតភ្ជាប់ទៅកាន់ API នៅ http://localhost:8000',
+    backendUnreachable: 'មិនអាចតភ្ជាប់ទៅកាន់ API នៅ https://biu-traffic-api.onrender.com',
     ensureBackend: 'សូមប្រាកដថាម៉ាស៊ីនមេ Backend កំពុងដំណើរការ:',
     retry: 'ព្យាយាមម្តងទៀត',
     connecting: 'កំពុងតភ្ជាប់...',
@@ -314,7 +314,7 @@ const executeScan = async () => {
   } catch (err) {
     if (err.code === 'ERR_NETWORK' || !err.response) {
       isBackendConnected.value = false
-      errorMessage.value = 'Cannot connect to backend server at http://localhost:8000.'
+      errorMessage.value = 'Cannot connect to backend server at https://biu-traffic-api.onrender.com.'
     } else {
       errorMessage.value = err.response?.data?.error || err.message || 'Scan failed.'
     }

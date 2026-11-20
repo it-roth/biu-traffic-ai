@@ -1,3 +1,8 @@
+import os
+import json
+import urllib.request
+from django.conf import settings
+from django.core.mail import send_mail
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.utils import timezone
@@ -20,11 +25,30 @@ class RegisterView(generics.CreateAPIView):
         # Initialize dynamic 2FA profile with unique RFC 6238 Base32 secret
         TwoFactorProfile.objects.get_or_create(user=user)
 
+        # Dispatch real welcome email via Gmail SMTP
+        if user.email and '@' in user.email:
+            try:
+                send_mail(
+                    subject='Welcome to BIU Traffic AI Platform',
+                    message=(
+                        f"Hello {user.username},\n\n"
+                        f"Welcome to BELTEI International University AI-Powered Traffic Law Enforcement System.\n"
+                        f"Your account is active. You can now access all telemetry, scanner, and audit tools.\n\n"
+                        f"Sign in portal: https://biu-traffic-ai.vercel.app/login\n\n"
+                        f"BELTEI International University • Campus 10"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
 
 class LoginView(APIView):
     """
     Dynamic 2FA-enabled JWT authentication endpoint.
-    Step 1: Validates credentials and returns real TOTP dynamic parameters.
+    Step 1: Validates credentials and returns real TOTP dynamic parameters + sends email code.
     Step 2: Verifies dynamic 6-digit TOTP code against Google Authenticator standard.
     """
     permission_classes = [permissions.AllowAny]
@@ -54,12 +78,34 @@ class LoginView(APIView):
         # Step 1: Pre-validation returns dynamic 2FA QR code & secret for Google Authenticator
         if validate_only:
             current_code = generate_totp(profile.secret_key)
+            recipient_email = user.email if user.email and '@' in user.email else settings.DEFAULT_FROM_EMAIL
+
+            # Dispatch real 2FA security code via Gmail SMTP
+            try:
+                send_mail(
+                    subject='BIU Traffic AI — Your 2FA Security Code',
+                    message=(
+                        f"Hello {user.username},\n\n"
+                        f"Your 6-digit Two-Factor Authentication (2FA) verification code is:\n\n"
+                        f"   {current_code}\n\n"
+                        f"This code was generated pursuant to Sub-Decree No. 39 security protocol.\n"
+                        f"Do not share this code with anyone.\n\n"
+                        f"BELTEI International University • AI Traffic Law Enforcement"
+                    ),
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[recipient_email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass
+
             return Response({
                 'status': 'valid',
                 'requires_2fa': profile.is_enabled,
                 'secret_key': profile.secret_key,
                 'otpauth_url': profile.otpauth_url,
                 'qr_code_url': f"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data={profile.otpauth_url}",
+                'email_sent_to': recipient_email,
                 'live_code_hint': current_code,  # For easy live demo & defense grading
             })
 
@@ -119,4 +165,90 @@ class ProtectedView(APIView):
             'username': request.user.username, 
             'email': request.user.email or f"{request.user.username}@beltei.edu.kh",
             'is_superuser': request.user.is_superuser,
+        })
+
+
+class GoogleLoginView(APIView):
+    """
+    POST /api/auth/google/
+    Validates Google OAuth2 ID token using Google tokeninfo API,
+    registers or links Django user, and issues SimpleJWT access and refresh tokens.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        token = request.data.get('token') or request.data.get('credential')
+        if not token:
+            return Response(
+                {'detail': 'Google OAuth credential token is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate ID token with Google's public tokeninfo endpoint
+        try:
+            req = urllib.request.Request(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={token}",
+                headers={'User-Agent': 'BIU-Traffic-AI'}
+            )
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+        except Exception as exc:
+            return Response(
+                {'detail': f'Google token validation error: {str(exc)}'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        google_aud = data.get('aud')
+        expected_client_id = getattr(
+            settings,
+            'GOOGLE_CLIENT_ID',
+            '1030898514261-k50cgev5g3tk45ai4k0jhkb9cm65a1h6.apps.googleusercontent.com'
+        )
+
+        if google_aud != expected_client_id:
+            return Response(
+                {'detail': 'Google OAuth Client ID mismatch.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        email = data.get('email')
+        if not email:
+            return Response(
+                {'detail': 'Google account email not provided.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Retrieve or register user
+        user = User.objects.filter(email__iexact=email).first()
+        if not user:
+            base_username = (data.get('given_name') or email.split('@')[0]).lower().replace(' ', '_')
+            username = base_username
+            counter = 1
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}_{counter}"
+                counter += 1
+
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=data.get('given_name', ''),
+                last_name=data.get('family_name', ''),
+            )
+            user.set_unusable_password()
+            user.save()
+
+            # Ensure 2FA profile exists
+            TwoFactorProfile.objects.get_or_create(user=user)
+
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+            }
         })
