@@ -323,7 +323,7 @@ def traffic_stats(request):
         },
         {
             'id': 'CP-04',
-            'name': 'BELTEI Campus 10 Perimeter Gate',
+            'name': 'BELTEI Perimeter Gate',
             'nameKm': 'បរិវេណសាកលវិទ្យាល័យប៊ែលធី ទីតាំងទី ១០',
             'status': 'ONLINE',
             'fps': 25,

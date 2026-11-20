@@ -212,9 +212,6 @@ const backToCredentials = () => {
       
       <!-- System Branding Header -->
       <div class="text-center space-y-3">
-        <div class="inline-flex p-2.5 rounded-2xl border border-border bg-card/80 shadow-2xl backdrop-blur-xl">
-          <img :src="biuLogo" alt="BELTEI International University" class="h-14 w-auto object-contain" />
-        </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
             <span class="text-primary">BIU</span> Traffic AI

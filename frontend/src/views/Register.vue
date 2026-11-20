@@ -98,9 +98,6 @@ const register = async () => {
       
       <!-- System Branding Header -->
       <div class="text-center space-y-3">
-        <div class="inline-flex p-2.5 rounded-2xl border border-border bg-card/80 shadow-2xl backdrop-blur-xl">
-          <img :src="biuLogo" alt="BELTEI International University" class="h-14 w-auto object-contain" />
-        </div>
         <div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground flex items-center justify-center gap-2">
             <span class="text-primary">BIU</span> Traffic AI
@@ -175,7 +172,7 @@ const register = async () => {
               <input
                 v-model="form.username"
                 type="text"
-                placeholder="saarothdoe"
+                placeholder="saaroth"
                 autocomplete="username"
                 required
                 class="flex h-10 w-full rounded-md border border-input bg-background/60 px-3.5 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:border-ring disabled:cursor-not-allowed disabled:opacity-50"
