@@ -3,8 +3,8 @@ Root URL configuration for BIU Traffic AI.
 """
 from django.contrib import admin
 from django.conf import settings
-from django.conf.urls.static import static
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.static import serve
 from django.http import JsonResponse
 
 def root_status(request):
@@ -13,6 +13,7 @@ def root_status(request):
         'status': 'OPERATIONAL',
         'version': '2.0.0',
         'enforcement': 'Cambodia Sub-Decree No. 39 Articles 8 & 44',
+        'ai_model': 'cambodia_ai_v3 (backend/weights/best.pt - 99.5% mAP50)',
         'endpoints': {
             'admin': '/admin/',
             'auth_login': '/api/auth/login/',
@@ -30,4 +31,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('api.urls')), 
     path('api/auth/', include('accounts.urls')),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

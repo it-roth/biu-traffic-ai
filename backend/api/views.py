@@ -317,17 +317,17 @@ def traffic_stats(request):
 
     ai_models = [
         {
+            'name': 'Cambodia Traffic YOLOv8 (best.pt)',
+            'type': 'Sub-Decree 39 Helmet & Vehicle Specialist',
+            'accuracy': '99.5%',
+            'latency': '24ms',
+            'status': 'Operational & Deployed'
+        },
+        {
             'name': 'YOLOv8x Vehicle Detector',
             'type': 'Cars, Trucks, Motos, Tuk-Tuks',
             'accuracy': '94.2%',
             'latency': '38ms',
-            'status': 'Operational'
-        },
-        {
-            'name': 'YOLOv8 Helmet Specialist',
-            'type': 'Helmet OK vs No-Helmet',
-            'accuracy': '91.8%',
-            'latency': '26ms',
             'status': 'Operational'
         },
         {

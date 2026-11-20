@@ -1,14 +1,3 @@
----
-title: BIU Traffic AI
-emoji: 🚦
-colorFrom: blue
-colorTo: indigo
-sdk: docker
-app_port: 7860
-pinned: false
-license: mit
----
-
 # BIU Traffic AI (`biu-traffic-ai`)
 ### BELTEI International University • AI-Powered Traffic Law Enforcement System
 
@@ -231,14 +220,13 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
 | No. | Student Name | Student ID | Role & Responsibilities |
 | :---: | :--- | :---: | :--- |
-| **01** | `[Student Name 1]` | `[ID: XXXXXXXX]` | **Team Lead & Computer Vision Engineer**<br>• YOLOv8 custom training & ByteTrack tracking pipeline<br>• Model optimization & Cambodian road dataset annotation |
+| **01** | `Leng Saroth` | `00057189` | **Team Lead & Computer Vision Engineer**<br>• YOLOv8 custom training & ByteTrack tracking pipeline<br>• Model optimization & Cambodian road dataset annotation |
 | **02** | `[Student Name 2]` | `[ID: XXXXXXXX]` | **Full-Stack Backend Engineer**<br>• Django 6.1 REST Framework, SimpleJWT auth & Neon DB<br>• Video MJPEG streaming engine & Sub-Decree No. 39 law logic |
 | **03** | `[Student Name 3]` | `[ID: XXXXXXXX]` | **Frontend Engineer & UI/UX Designer**<br>• Vue 3.5, Vite & Tailwind CSS command center<br>• Real-time HUD surveillance feed & bilingual Khmer/EN localization |
 | **04** | `[Student Name 4]` | `[ID: XXXXXXXX]` | **DevOps & QA Engineer**<br>• Docker containerization, Hugging Face Spaces deployment<br>• End-to-end testing, evidence archiving & security audit |
 
 ### 🎓 Academic Supervision
-* **Project Advisor**: `[Professor / Lecturer Name]`
-* **Dean of Faculty**: `[Dean Name / Department Head]`
+* **Project Advisor**: `Dr.Chen Sovann`
 * **Institution**: BELTEI International University • Campus 10, Phnom Penh, Kingdom of Cambodia
 
 ---
